@@ -38,9 +38,9 @@ const Header = ({ scrollToSection }) => {
             <button onClick={() => scrollToSection('products')} className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Products
             </button>
-            {/* <button onClick={() => scrollToSection('reviews')} className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Reviews
-            </button> */}
+           <Link to="/product-input-form" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            Create Listing
+          </Link>
             <button onClick={() => scrollToSection('about')} className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               About
             </button>

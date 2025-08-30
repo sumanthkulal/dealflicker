@@ -1,18 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, ChevronRight, ChevronLeft } from 'lucide-react';
-import ProductCard from './ProductCard';
+import ProductCard from './ProductCard'; // Import the new ProductCard component
 import './index.css';
 
 const ProductGrid = () => {
+    // Initialize state with null to indicate that no data has been fetched yet
     const [products, setProducts] = useState(null);
     const [categories, setCategories] = useState(null);
     const [currentCategory, setCurrentCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [favorites, setFavorites] = useState([]);
-    const [loading, setLoading] = useState(true);
-
+    const [loading, setLoading] = useState(true); // New loading state
+    
     const categoriesRef = useRef(null);
 
+    // Use useEffect to fetch data when the component mounts
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -26,30 +28,27 @@ const ProductGrid = () => {
             } catch (error) {
                 console.error("Failed to fetch products:", error);
             } finally {
-                setLoading(false);
+                setLoading(false); // Set loading to false after fetch is complete
             }
         };
 
         fetchProducts();
-    }, []);
+    }, []); // Empty dependency array means this runs only once on mount
 
+    // Conditional rendering for loading state
     if (loading || !products || !categories) {
         return <div className="text-center py-16">Loading products...</div>;
     }
 
-    const filteredAndSortedProducts = products
-        // Sort products by creation date or a unique ID in descending order
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Assuming 'createdAt' field exists
-        .filter(product => {
-            const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
-            const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesCategory && matchesSearch;
-        })
-        .slice(0, 8); // Limit to the first 8 results
+    const filteredProducts = products.filter(product => {
+        const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
     const toggleFavorite = (productId) => {
-        setFavorites(prev =>
-            prev.includes(productId)
+        setFavorites(prev => 
+            prev.includes(productId) 
                 ? prev.filter(id => id !== productId)
                 : [...prev, productId]
         );
@@ -70,10 +69,10 @@ const ProductGrid = () => {
     return (
         <section id="products" className="py-16 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
+                {/* <div className="text-center mb-12">
                     <h2 className="text-4xl font-bold text-gray-900 mb-4">Featured Products</h2>
                     <p className="text-xl text-gray-600">Handpicked deals and top-rated items</p>
-                </div>
+                </div> */}
 
                 <div className="flex flex-col md:flex-row gap-4 mb-8">
                     <div className="relative flex-1 md:flex-[0.6]">
@@ -124,13 +123,13 @@ const ProductGrid = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                    {filteredAndSortedProducts.length > 0 ? (
-                        filteredAndSortedProducts.map(product => (
-                            <ProductCard
-                                key={product.id}
-                                product={product}
-                                toggleFavorite={toggleFavorite}
-                                favorites={favorites}
+                    {filteredProducts.length > 0 ? (
+                        filteredProducts.map(product => (
+                            <ProductCard 
+                                key={product.id} 
+                                product={product} 
+                                toggleFavorite={toggleFavorite} 
+                                favorites={favorites} 
                             />
                         ))
                     ) : (
