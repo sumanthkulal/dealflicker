@@ -37,9 +37,11 @@ const ProductGrid = () => {
         return <div className="text-center py-16">Loading products...</div>;
     }
 
+    console.log(categories)
+
     const filteredAndSortedProducts = products
-        // Sort products by creation date or a unique ID in descending order
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Assuming 'createdAt' field exists
+        // Corrected: Sort by MongoDB _id, which contains a timestamp
+        .sort((a, b) => b._id.localeCompare(a._id)) 
         .filter(product => {
             const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
             const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());

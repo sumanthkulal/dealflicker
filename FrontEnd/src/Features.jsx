@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, Shield, Truck, Users } from 'lucide-react';
+import { Award, Shield, Truck, Users,Zap } from 'lucide-react';
 
 const Features = () => {
   return (
@@ -13,13 +13,16 @@ const Features = () => {
             <h3 className="text-xl font-semibold mb-2 text-gray-900">Expert Verified</h3>
             <p className="text-gray-600">Thoroughly tested and verified by our product experts with years of experience</p>
           </div>
+
           <div className="text-center group hover:transform hover:scale-105 transition-all duration-300">
-            <div className="w-20 h-20 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl">
-              <Truck className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl">
+              <Zap className="w-10 h-10 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-gray-900">Fast Shipping</h3>
-            <p className="text-gray-600">Lightning-fast delivery through Amazon Prime with same-day and next-day options</p>
+            <h3 className="text-xl font-semibold mb-2 text-gray-900">Lightning Deal</h3>
+            <p className="text-gray-600">Exclusive time-limited offers on top Amazon products, updated daily for maximum savings</p>
           </div>
+
+
           <div className="text-center group hover:transform hover:scale-105 transition-all duration-300">
             <div className="w-20 h-20 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl">
               <Shield className="w-10 h-10 text-white" />

@@ -6,6 +6,7 @@ import ProductGrid from './ProductGrid';
 import Testimonials from './Testimonials';
 import About from './About';
 import Footer from './Footer'; // <-- Import the new Footer component
+import Social from './Social';
 
 
 const HomePage = () => {
@@ -21,6 +22,7 @@ const HomePage = () => {
       <ProductGrid />
       {/* <Testimonials /> */}
       <About />
+      <Social/>
       <Footer scrollToSection={scrollToSection} /> {/* <-- The new Footer component */}
     </div>
   );

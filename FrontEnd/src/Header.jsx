@@ -35,9 +35,10 @@ const Header = ({ scrollToSection }) => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <button onClick={() => scrollToSection('products')} className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Products
-            </button>
+            <Link to="/all-products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            Products
+          </Link>
+
            <Link to="/product-input-form" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
             Create Listing
           </Link>

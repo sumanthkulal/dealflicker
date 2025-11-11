@@ -1,43 +1,52 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
-  // Rely on MongoDB's default _id for a unique identifier
   name: {
     type: String,
-    required: true,
+    required: [true, 'Product name is required'],
     trim: true,
-    minlength: 3,
+    minlength: [3, 'Product name must be at least 3 characters long'],
   },
   price: {
     type: Number,
-    required: true,
-    min: 0,
+    required: [true, 'Price is required'],
+    min: [0, 'Price must be a number greater than or equal to 0'],
   },
-  // Make originalPrice optional, as it is only needed for discounted products
   originalPrice: {
     type: Number,
-    min: 0,
+    min: [0, 'Original price must be a number greater than or equal to 0'],
   },
   rating: {
     type: Number,
-    min: 0,
-    max: 5,
+    min: [0, 'Rating must be a number between 0 and 5'],
+    max: [5, 'Rating must be a number between 0 and 5'],
   },
   reviews: {
     type: Number,
-    min: 0,
+    min: [0, 'Reviews must be a number greater than or equal to 0'],
   },
   image: {
     type: String,
     trim: true,
-    required: true,
+    required: [true, 'Image URL is required'],
   },
   category: {
     type: String,
     trim: true,
-    required: true,
+    required: [true, 'Category is required'],
     lowercase: true,
-    enum: ["electronics", "home", "fitness"],
+    enum: ["electronics", "home", "fitness","appliances","automotive","computers","mobile","home & kitchen","tools"],
+  },
+  platform: {
+    type: String,
+    trim: true,
+    required: [true, 'Platform is required'],
+    lowercase: true,
+    enum: ["amazon", "flipkart", "ebay", "best buy"],
+  },
+  brand: {
+    type: String,
+    trim: true,
   },
   features: [
     {
@@ -46,6 +55,11 @@ const productSchema = new mongoose.Schema({
     },
   ],
   amazonLink: {
+    type: String,
+    trim: true,
+    required: [true, 'Amazon Link is required'],
+  },
+  youtubeLink: {
     type: String,
     trim: true,
   },
