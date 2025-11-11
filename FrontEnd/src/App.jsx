@@ -10,6 +10,8 @@ import ProductPage from './ProductList';
 import ProductLandingPage from './videoPage';
 import Test from './Test';
 import UpdateProductForm from './UpdateProductForm';
+import ProfilePage from './ProfilePage';
+
 
 const App = () => {
   // 1. Shared state for products
@@ -48,6 +50,7 @@ const App = () => {
 
         {/* Test page will now receive product via navigation state */}
         <Route path="/test" element={<Test />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </Router>
   );
