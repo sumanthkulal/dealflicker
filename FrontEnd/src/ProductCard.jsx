@@ -91,3 +91,5 @@ const ProductCard = ({ product, toggleFavorite, favorites, hideReviews = false }
 };
 
 export default ProductCard;
+
+//emails id updated
