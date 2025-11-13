@@ -16,10 +16,12 @@ const renderStars = (rating) => {
 // Add the 'hideReviews' prop with a default value of false
 const ProductCard = ({ product, toggleFavorite, favorites, hideReviews = false }) => {
   const navigate = useNavigate();
-  const isFavorite = favorites.includes(product.id);
+  
+  // FIX: Use product._id to check if this specific item is in favorites
+  const isFavorite = favorites.includes(product._id); 
 
   const handleViewDetails = () => {
-    // Navigate to a dynamic URL that includes the product's unique ID (_id)
+    // Using product._id for routing details
     navigate(`/product/${product._id}`); 
   };
 
@@ -37,7 +39,8 @@ const ProductCard = ({ product, toggleFavorite, favorites, hideReviews = false }
           </span>
         </div>
         <button
-          onClick={() => toggleFavorite(product.id)}
+          // FIX: Pass product._id to the toggleFavorite function
+          onClick={() => toggleFavorite(product._id)}
           className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
         >
           <Heart
@@ -53,15 +56,15 @@ const ProductCard = ({ product, toggleFavorite, favorites, hideReviews = false }
           {product.name}
         </h3>
        
-        {/* Conditionally render the reviews section based on the new prop */}
+        {/* Conditionally render the reviews section based on the new prop */}
         {!hideReviews && (
-            <div className="flex items-center gap-2 mb-2">
-                <div className="flex">{renderStars(product.rating)}</div>
-                <span className="text-sm text-gray-600">
-                    ({product.reviews} reviews)
-                </span>
-            </div>
-        )}
+            <div className="flex items-center gap-2 mb-2">
+                <div className="flex">{renderStars(product.rating)}</div>
+                <span className="text-sm text-gray-600">
+                    ({product.reviews} reviews)
+                </span>
+            </div>
+        )}
 
         <div className="flex items-center gap-3 mb-3">
           <span className="text-2xl font-bold text-gray-900">

@@ -37,17 +37,14 @@ const ProductGrid = () => {
         return <div className="text-center py-16">Loading products...</div>;
     }
 
-    console.log(categories)
-
     const filteredAndSortedProducts = products
-        // Corrected: Sort by MongoDB _id, which contains a timestamp
         .sort((a, b) => b._id.localeCompare(a._id)) 
         .filter(product => {
             const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
             const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
             return matchesCategory && matchesSearch;
         })
-        .slice(0, 8); // Limit to the first 8 results
+        .slice(0, 8); 
 
     const toggleFavorite = (productId) => {
         setFavorites(prev =>
@@ -129,7 +126,8 @@ const ProductGrid = () => {
                     {filteredAndSortedProducts.length > 0 ? (
                         filteredAndSortedProducts.map(product => (
                             <ProductCard
-                                key={product.id}
+                                // FIX: Use product._id as the unique key
+                                key={product._id} 
                                 product={product}
                                 toggleFavorite={toggleFavorite}
                                 favorites={favorites}
