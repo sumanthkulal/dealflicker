@@ -1,6 +1,8 @@
 import React from "react";
 import { Star, ShoppingCart, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+// 🚨 NEW: Import useAuth from Clerk
+import { useAuth } from '@clerk/clerk-react'; 
 
 const renderStars = (rating) => {
   return Array.from({ length: 5 }, (_, i) => (
@@ -16,13 +18,26 @@ const renderStars = (rating) => {
 // Add the 'hideReviews' prop with a default value of false
 const ProductCard = ({ product, toggleFavorite, favorites, hideReviews = false }) => {
   const navigate = useNavigate();
+  // 🚨 NEW: Get the authentication status
+  const { isSignedIn } = useAuth(); 
   
-  // FIX: Use product._id to check if this specific item is in favorites
+  // Correctly uses product._id to check if this specific item is in favorites
   const isFavorite = favorites.includes(product._id); 
 
   const handleViewDetails = () => {
     // Using product._id for routing details
     navigate(`/product/${product._id}`); 
+  };
+  
+  // 🚨 NEW: Handler to check login status before toggling favorite
+  const handleLikeClick = () => {
+    if (!isSignedIn) {
+      // If user is NOT logged in, redirect them to the login page
+      navigate('/user-login');
+      return; 
+    }
+    // If user IS logged in, proceed to the main toggle logic (which will call the API)
+    toggleFavorite(product._id);
   };
 
   return (
@@ -39,8 +54,8 @@ const ProductCard = ({ product, toggleFavorite, favorites, hideReviews = false }
           </span>
         </div>
         <button
-          // FIX: Pass product._id to the toggleFavorite function
-          onClick={() => toggleFavorite(product._id)}
+          // 🚨 Call the new guarded handler
+          onClick={handleLikeClick} 
           className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
         >
           <Heart
@@ -91,5 +106,3 @@ const ProductCard = ({ product, toggleFavorite, favorites, hideReviews = false }
 };
 
 export default ProductCard;
-
-//emails id updated

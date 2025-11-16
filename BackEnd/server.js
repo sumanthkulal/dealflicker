@@ -1,133 +1,167 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-// Assuming you have defined a Mongoose Product model in a separate file, e.g., './models/Product.js'
 const Product = require('./models/Product');
+const likesRouter = require('./routes/likes');
+
+const { authenticateUser } = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// MongoDB connection string
-const mongoURI = 'mongodb://localhost:27017/dealfinder';
 
-// Connect to MongoDB
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// -------------------------------
+// Clerk JWT Key Check
+// -------------------------------
+if (!process.env.CLERK_JWT_KEY) {
+  console.error("❌ Missing CLERK_JWT_KEY");
+  process.exit(1);
+}
 
-// Enable CORS for all routes
+console.log("🔑 Clerk JWT Key Loaded");
+
+
+// -------------------------------
+// MongoDB
+// -------------------------------
+mongoose
+  .connect(process.env.MONGO_URI || "mongodb://localhost:27017/dealfinder")
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch(err => console.error("❌ MongoDB error:", err));
+
+
+// -------------------------------
+// Middleware
+// -------------------------------
 app.use(cors());
-
-// Enable Express to parse JSON data from incoming requests
 app.use(express.json());
 
-/**
- * --- GET route to fetch all products and categories ---
- */
+
+// -------------------------------
+// Protected Like Routes
+// -------------------------------
+app.use("/api", likesRouter);
+
+
+// -------------------------------
+// PUBLIC ROUTES
+// -------------------------------
 app.get('/api/products', async (req, res) => {
   try {
     const products = await Product.find({});
-    const categories = ['all', ...new Set(products.map(product => product.category))];
+    const categories = ["all", ...new Set(products.map(p => p.category))];
+
     res.json({ products, categories });
-  } catch (error) {
-    console.error('Error fetching data from MongoDB:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+  } catch (err) {
+    res.status(500).json({ message: "Internal error" });
   }
 });
 
-/**
- * --- GET route to fetch a single product by ID ---
- */
 app.get('/api/products/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const product = await Product.findById(id);
-
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    const product = await Product.findById(req.params.id);
+    if (!product)
+      return res.status(404).json({ message: "Product not found" });
 
     res.json(product);
-  } catch (error) {
-    console.error('Error fetching product by ID:', error);
-    res.status(500).json({ message: 'Server error' });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-/**
- * --- POST route to handle new product creation ---
- */
-app.post('/api/products', async (req, res) => {
+
+// -------------------------------
+// ADMIN ROUTES (Clerk Auth Required)
+// -------------------------------
+app.post('/api/products', authenticateUser, async (req, res) => {
+
+  // 🚨 DEBUG STEP: Print the full decoded object and the value being checked
+  console.log("DECODED JWT (req.auth) RECEIVED:", req.auth);
+  // 👇 CORRECTED: Accessing metadata directly from the decoded JWT payload
+  console.log("EXPECTED ROLE PATH VALUE:", req.auth.metadata?.role);
+
+  // ✔ Admin Role Check (CORRECTED)
+  if (req.auth.metadata?.role !== "admin") {
+    return res.status(403).json({ message: "Admin access only: Role mismatch" });
+  }
+
   try {
     const newProduct = new Product(req.body);
     await newProduct.save();
-    res.status(201).json({ message: 'Product added successfully!', product: newProduct });
-  } catch (error) {
-    console.error('Error saving new product:', error);
-    res.status(400).json({ message: 'Error adding product', error: error.message });
+
+    res.status(201).json({ message: "Product added", product: newProduct });
+
+  } catch (err) {
+    res.status(400).json({ message: "Failed to add", error: err.message });
   }
 });
 
-/**
- * --- PUT route to update a product by ID ---
- */
-app.put('/api/products/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updatedProductData = req.body;
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      updatedProductData,
-      { new: true, runValidators: true }
+app.put('/api/products/:id', authenticateUser, async (req, res) => {
+
+  // ✔ Admin Role Check (CORRECTED)
+  if (req.auth.metadata?.role !== "admin") {
+    return res.status(403).json({ message: "Admin only" });
+  }
+
+  try {
+    const updated = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
     );
 
-    if (!updatedProduct) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    if (!updated) return res.status(404).json({ message: "Not found" });
 
-    res.status(200).json({ message: 'Product updated successfully!', product: updatedProduct });
-  } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(400).json({ message: 'Error updating product', error: error.message });
+    res.json({ message: "Updated", product: updated });
+
+  } catch (err) {
+    res.status(400).json({ message: "Update failed", error: err.message });
   }
 });
 
-/**
- * --- DELETE route to remove a product by ID ---
- */
-app.delete('/api/products/:id', async (req, res) => {
+
+app.delete('/api/products/:id', authenticateUser, async (req, res) => {
+
+  // ✔ Admin Role Check (CORRECTED)
+  if (req.auth.metadata?.role !== "admin") {
+    return res.status(403).json({ message: "Admin only" });
+  }
+
   try {
-    const productId = req.params.id;
-    const deletedProduct = await Product.findByIdAndDelete(productId);
+    const deleted = await Product.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Not found" });
 
-    if (!deletedProduct) {
-      return res.status(404).json({ message: 'Product not found.' });
-    }
+    res.json({ message: "Deleted" });
 
-    res.status(200).json({ message: 'Product deleted successfully.' });
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ message: 'Server error.' });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
 
-
-
-
-// Get all categories (from schema enum, not just existing products)
+// -------------------------------
+// Categories
+// -------------------------------
 app.get("/api/categories", (req, res) => {
   try {
-    const categories = Product.schema.path("category").enumValues; 
+    const categories = Product.schema.path("category").enumValues;
     res.json(categories);
   } catch (err) {
-    console.error("Error fetching categories:", err);
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
+
+
+// -------------------------------
+// Start Server
+// -------------------------------
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+
+console.log("server is on")
